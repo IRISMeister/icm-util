@@ -1,0 +1,6 @@
+**/iris.key
+**/*.gz
+pubip.txt
+privateip.txt
+res.json
+.vscode
