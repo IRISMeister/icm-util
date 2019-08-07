@@ -27,7 +27,7 @@ docker exec $icmname mkdir -p /Samples/license/ubuntu/ShardMaster/
 
 docker cp $kitname $icmname:/root
 docker exec $icmname mkdir -p $icmdata
-docker cp $provider/ubuntu/defaults.json $icmname:$icmdata/
+docker cp $provider/ubuntu/defaults.json $icmname:$icmdata/defaults.json
 # pick a definitions.json to use here.
 docker cp $provider/ubuntu/definitions-shard.json $icmname:$icmdata/definitions.json
 
