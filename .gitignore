@@ -5,5 +5,5 @@ privateip.txt
 res.json
 .vscode
 cmd.sh
-azure
 aws/redhat/
+azure/ubuntu/defaults-dont-upload.json
