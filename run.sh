@@ -18,8 +18,8 @@ if [ $provider = "aws" ]; then
 fi
 
 # Don't re-use the container
-docker stop $icmname
-docker rm $icmname
+docker stop $icmname | true
+docker rm $icmname | true
 
 docker run -d --name $icmname $icmimg tail -f /dev/null
 docker exec $icmname sh -c "keygenTLS.sh; keygenSSH.sh"
