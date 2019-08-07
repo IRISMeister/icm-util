@@ -17,7 +17,7 @@
     "Zone": "ap-northeast-1a",
     "AMI": "ami-09c81ecf1c2b2ef70",
     "InstanceType": "m4.large",
-    "Credentials": "/Samples/AWS/credentials",
+    "Credentials": "credentials",
     "KitURL": "file://tmp/IRIS-2019.1.0.510.0-lnxubuntux64.tar.gz",
     "SystemMode": "TEST",
     "ISCPassword": "sys",

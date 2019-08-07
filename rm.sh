@@ -1,7 +1,7 @@
 #!/bin/bash
-export icm=myicm
+source envs.sh
 
 # cleanup cloud resources
-docker exec $icm sh -c "cd /Samples/AWS; icm unprovision -cleanUp -force; rm *.log"
-docker stop $icm
-docker rm $icm
+docker exec $icmname sh -c "cd $icmdata; icm unprovision -cleanUp -force; rm *.log"
+docker stop $icmname
+docker rm $icmname
