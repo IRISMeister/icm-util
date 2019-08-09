@@ -51,8 +51,6 @@ docker exec $icmname sh -c "cd $icmdata; icm provision; icm scp -localPath /root
 docker exec $icmname sh -c "cd $icmdata; icm ps -json > /dev/null; cat response.json" > res.json
 docker exec $icmname sh -c "cd $icmdata; icm ps -json > /dev/null; cat response.json" | python3 decode-pubip.py > pubip.txt
 
-exit 0
-
 if [ $targetos = "ubuntu" ]; then
   rm cmd.sh | true
   while read line
