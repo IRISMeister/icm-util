@@ -6,4 +6,5 @@ res.json
 .vscode
 cmd.sh
 aws/redhat/
-azure/ubuntu/defaults-dont-upload.json
+*dont-upload*
+azure/centos/defaults-container.json
