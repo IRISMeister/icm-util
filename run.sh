@@ -51,7 +51,7 @@ docker cp iris.key $icmname:/Production/license/
 if [ isContainerless = "true" ]; then
   docker exec $icmname sh -c "cd $icmdata; icm provision; icm scp -localPath /root/$kitname -remotePath /tmp; icm install"
 else
-  docker exec $icmname sh -c "cd $icmdata; icm provision -verbose -force; icm run -verbose -force"
+  docker exec $icmname sh -c "cd $icmdata; icm provision; icm run"
 fi
 
 docker exec $icmname sh -c "cd $icmdata; icm ps -json > /dev/null; cat response.json" > res.json
