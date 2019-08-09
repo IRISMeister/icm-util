@@ -5,6 +5,6 @@ privateip.txt
 res.json
 .vscode
 cmd.sh
-aws/redhat/
 *dont-upload*
-azure/centos/defaults-container.json
+**/iris-container.key
+**/iris-normal.key

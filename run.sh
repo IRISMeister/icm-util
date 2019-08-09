@@ -18,9 +18,13 @@ if [ ! -d $provider/$targetos ]; then
     exit 1
 fi
 
-if [ ! -e $kitname ]; then
-  echo "Kit $kitname doesn't exist."
-  exit 1
+# Is this Containerless or not?
+isContainerless=$(cat $provider/$targetos/$defaults | python3 -c 'import json,sys; print (json.load(sys.stdin)["Containerless"])')
+if [ isContainerless = "true" ]; then
+  if [ ! -e $kitname ]; then
+    echo "Kit $kitname doesn't exist."
+    exit 1
+  fi
 fi
 
 # Don't re-use the container
@@ -44,22 +48,38 @@ fi
 #; place your valid license key here
 docker cp iris.key $icmname:/Production/license/
 
-docker exec $icmname sh -c "cd $icmdata; icm provision; icm scp -localPath /root/$kitname -remotePath /tmp; icm install"
+if [ isContainerless = "true" ]; then
+  docker exec $icmname sh -c "cd $icmdata; icm provision; icm scp -localPath /root/$kitname -remotePath /tmp; icm install"
+else
+  docker exec $icmname sh -c "cd $icmdata; icm provision -verbose -force; icm run -verbose -force"
+fi
 
-# ++ ICM uses public ip for shard members. I want to avoid it. ++
-# try to get private IPs
 docker exec $icmname sh -c "cd $icmdata; icm ps -json > /dev/null; cat response.json" > res.json
-docker exec $icmname sh -c "cd $icmdata; icm ps -json > /dev/null; cat response.json" | python3 decode-pubip.py > pubip.txt
+# ++ containerless ICM uses public ip for shard members. I want to avoid it. ++
+# try to get private IPs
+if [ isContainerless = "true" ]; then
+  docker exec $icmname sh -c "cd $icmdata; icm ps -json > /dev/null; cat response.json" | python3 decode-pubip.py > pubip.txt
 
-if [ $targetos = "ubuntu" ]; then
+  # get SSHUser
+  sshusername=$(cat $provider/$targetos/$defaults | python3 -c 'import json,sys; print (json.load(sys.stdin)["SSHUser"])')
+  if [ $targetos = "ubuntu" ]; then
+    ip=ip
+  fi
+  if [ $targetos = "centos" ]; then
+    ip=/usr/sbin/ip
+  fi
+  if [ $targetos = "redhat" ]; then
+    ip=/usr/sbin/ip
+  fi
+
   rm cmd.sh | true
-  while read line
+  while read hostipaddress
   do
     if [ $provider = "aws" ]; then
-      printf "docker exec $icmname sh -c \"ssh -i /Samples/ssh/insecure -oStrictHostKeyChecking=no ubuntu@$line 'curl -s http://169.254.169.254/latest/meta-data/local-ipv4'; echo ''\"\n" >> cmd.sh
+      printf "docker exec $icmname sh -c \"ssh -i /Samples/ssh/insecure -oStrictHostKeyChecking=no $sshusername@$hostipaddress 'curl -s http://169.254.169.254/latest/meta-data/local-ipv4'; echo ''\"\n" >> cmd.sh
     fi
     if [ $provider = "azure" ]; then
-      printf "docker exec myicm sh -c \"ssh -i /Samples/ssh/insecure -oStrictHostKeyChecking=no ubuntu@$line ip -4 -br a show dev eth0 | awk '{ print \\\$3}' | awk -F'/' '{ print \\\$1 }'\"\n" >> cmd.sh
+      printf "docker exec myicm sh -c \"ssh -i /Samples/ssh/insecure -oStrictHostKeyChecking=no $sshusername@$hostipaddress $ip -4 -br a show dev eth0 | awk '{ print \\\$3}' | awk -F'/' '{ print \\\$1 }'\"\n" >> cmd.sh
     fi
   done < ./pubip.txt
   ./cmd.sh > privateip.txt
@@ -71,12 +91,15 @@ if [ $targetos = "ubuntu" ]; then
   docker cp reassign-shard.sh $icmname:/root
   docker exec $icmname /root/reassign-shard.sh $icmdata
 fi
-# -- ICM uses public ip for shard members. I want to avoid it. --
+# -- containerless ICM uses public ip for shard members. I want to avoid it. --
 
-# install app classes
-docker cp install-apps.sh $icmname:/root
-docker cp icmcl-atelier-prj $icmname:/root
-docker exec $icmname /root/install-apps.sh $icmdata
-# verification
+if [ isContainerless = "true" ]; then
+  # install app classes
+  # Assuming no need to do this for container version because apps come along.
+  docker cp install-apps.sh $icmname:/root
+  docker cp icmcl-atelier-prj $icmname:/root
+  docker exec $icmname /root/install-apps.sh $icmdata
+  # verification
+fi
 ip=$(docker exec $icmname sh -c "cd $icmdata; icm ps -json > /dev/null; cat response.json" | python3 decode-dmname.py)
 curl -H "Content-Type: application/json; charset=UTF-8" -H "Accept:application/json" "http://$ip:52773/csp/myapp/get" --user "SuperUser:sys"

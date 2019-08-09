@@ -21,5 +21,6 @@ ROUTINE helper
    zw $SYSTEM.Sharding.AssignShard(ns,line,51773,ns)
  }
  Do $SYSTEM.Sharding.ListShards()
+ ZW $SYSTEM.Sharding.VerifyShards()
 
  Return

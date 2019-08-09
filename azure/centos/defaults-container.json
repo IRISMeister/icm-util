@@ -1,5 +1,5 @@
 {
-    "Containerless": "true",
+    "Containerless": "false",
     "Provider": "Azure",
     "Label": "MyIRIS",
     "Tag": "PROD",
@@ -25,7 +25,9 @@
     "ClientId": "xxxxx",
     "ClientSecret": "xxxxx",
     "TenantId": "xxxxx",
-    "KitURL": "file://tmp/IRIS-2019.1.0.510.4-lnxrhx64.tar.gz",
+    "DockerImage": "xxxxx",
+    "DockerUsername": "xxxxx",
+    "DockerPassword": "xxxxx",
     "ISCPassword": "sys",
     "Namespace": "MYAPP",
     "Mirror": "false",
