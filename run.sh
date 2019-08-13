@@ -72,7 +72,9 @@ if [ $isContainerless = "true" ]; then
     ip=/usr/sbin/ip
   fi
 
-  rm cmd.sh | true
+  if [ -e cmd.sh ]; then
+    rm cmd.sh
+  fi
   while read hostipaddress
   do
     if [ $provider = "aws" ]; then
@@ -82,6 +84,7 @@ if [ $isContainerless = "true" ]; then
       printf "docker exec myicm sh -c \"ssh -i /Samples/ssh/insecure -oStrictHostKeyChecking=no $sshusername@$hostipaddress $ip -4 -br a show dev eth0 | awk '{ print \\\$3}' | awk -F'/' '{ print \\\$1 }'\"\n" >> cmd.sh
     fi
   done < ./pubip.txt
+  chmod +x cmd.sh
   ./cmd.sh > privateip.txt
 
   # copy ip infos to DM to run helper routine which deassigns/assigns shards.
