@@ -20,7 +20,7 @@ fi
 
 # Is this Containerless or not?
 isContainerless=$(cat $provider/$targetos/$defaults | python3 -c 'import json,sys; print (json.load(sys.stdin)["Containerless"])')
-if [ isContainerless = "true" ]; then
+if [ $isContainerless = "true" ]; then
   if [ ! -e $kitname ]; then
     echo "Kit $kitname doesn't exist."
     exit 1
@@ -48,7 +48,7 @@ fi
 #; place your valid license key here
 docker cp iris.key $icmname:/Production/license/
 
-if [ isContainerless = "true" ]; then
+if [ $isContainerless = "true" ]; then
   docker exec $icmname sh -c "cd $icmdata; icm provision; icm scp -localPath /root/$kitname -remotePath /tmp; icm install"
 else
   docker exec $icmname sh -c "cd $icmdata; icm provision; icm run"
@@ -57,7 +57,7 @@ fi
 docker exec $icmname sh -c "cd $icmdata; icm ps -json > /dev/null; cat response.json" > res.json
 # ++ containerless ICM uses public ip for shard members. I want to avoid it. ++
 # try to get private IPs
-if [ isContainerless = "true" ]; then
+if [ $isContainerless = "true" ]; then
   docker exec $icmname sh -c "cd $icmdata; icm ps -json > /dev/null; cat response.json" | python3 decode-pubip.py > pubip.txt
 
   # get SSHUser
@@ -93,7 +93,7 @@ if [ isContainerless = "true" ]; then
 fi
 # -- containerless ICM uses public ip for shard members. I want to avoid it. --
 
-if [ isContainerless = "true" ]; then
+if [ $isContainerless = "true" ]; then
   # install app classes
   # Assuming no need to do this for container version because apps come along.
   docker cp install-apps.sh $icmname:/root
