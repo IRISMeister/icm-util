@@ -5,5 +5,6 @@ else
  cd $1
 fi
 
-icm scp -role DM -localPath /root/icmcl-atelier-prj/ -remotePath /tmp
-icm session -namespace MYAPP -role DM -command 'D $SYSTEM.OBJ.Load("/tmp/MyApps/Installer.cls","ck") D ##class(MyApps.Installer).setup()'
+icm ssh -role DM -command "mkdir /tmp/prj"
+icm scp -role DM -localPath /root/icmcl-atelier-prj/ -remotePath /tmp/prj
+icm session -namespace USER -role DM -command 'D $SYSTEM.OBJ.Load("/tmp/prj/MyApps/Installer.cls","ck") D ##class(MyApps.Installer).setup()'

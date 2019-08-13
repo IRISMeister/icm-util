@@ -8,7 +8,7 @@ XData setup [ XMLNamespace = INSTALLER ]
 
 <Namespace Name="${Namespace}" Create="no">
   <CSPApplication Url="/csp/${Namespace}" Directory="${CSPDIR}${Namespace}" Resource=""/>
-  <Import File="/tmp/MyApp/" Flags="ck" Recurse="true"/>
+  <Import File="/tmp/prj/" Flags="ck" Recurse="true"/>
   <Invoke Class="MyApp.Utils" Method="Init" CheckStatus="1" Return="RetVal">
 	<Arg Value="/csp/${Namespace}"/>
   </Invoke>
