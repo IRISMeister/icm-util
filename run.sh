@@ -54,6 +54,13 @@ else
   docker exec $icmname sh -c "cd $icmdata; icm provision; icm run"
 fi
 
+rm -fR ./Backup/*
+# save ssh/tls folder(s) to local, just in case.
+docker cp $icmname:/Samples/ssh/ ./Backup/ssh
+docker cp $icmname:/Samples/tls/ ./Backup/tls
+# save Production folder(s) to local, just in case.
+docker cp $icmname:/$icmdata/ ./Backup/
+
 docker exec $icmname sh -c "cd $icmdata; icm ps -json > /dev/null; cat response.json" > res.json
 # ++ containerless ICM uses public ip for shard members. I want to avoid it. ++
 # try to get private IPs
