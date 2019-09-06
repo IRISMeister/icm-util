@@ -39,14 +39,14 @@ docker cp $kitname $icmname:/root
 docker exec $icmname mkdir -p $icmdata
 docker cp $provider/$targetos/$defaults $icmname:$icmdata/defaults.json
 # pick a definitions.json to use here.
-docker cp definitions-shard.json $icmname:$icmdata/definitions.json
+docker cp $definitions $icmname:$icmdata/definitions.json
 
 # need to aquire a valid aws credential beforehand
 if [ $provider = "aws" ]; then
   docker cp ~/.aws/credentials $icmname:$icmdata/credentials
 fi
 #; place your valid license key here
-docker cp iris.key $icmname:/Production/license/
+docker cp $iriskey $icmname:/Production/license/iris.key
 
 if [ $isContainerless = "true" ]; then
   docker exec $icmname sh -c "cd $icmdata; icm provision; icm scp -localPath /root/$kitname -remotePath /tmp; icm install"
@@ -61,12 +61,13 @@ docker cp $icmname:/Samples/tls/ ./Backup/tls
 # save Production folder(s) to local, just in case.
 docker cp $icmname:/$icmdata/ ./Backup/
 
-docker exec $icmname sh -c "cd $icmdata; icm ps -json > /dev/null; cat response.json" > res.json
+docker exec $icmname sh -c "cd $icmdata; icm inventory -json > /dev/null; cat response.json" > inventory.json
+docker exec $icmname sh -c "cd $icmdata; icm ps -json > /dev/null; cat response.json" > ps.json
 # ++ containerless ICM uses public ip for shard members. I want to avoid it. ++
+# Should use Bastion Host if available.
 # try to get private IPs
-if [ $isContainerless = "true" ]; then
+if [ $forceinternalip = "1" ]; then
   docker exec $icmname sh -c "cd $icmdata; icm ps -json > /dev/null; cat response.json" | python3 decode-pubip.py > pubip.txt
-
   # get SSHUser
   sshusername=$(cat $provider/$targetos/$defaults | python3 -c 'import json,sys; print (json.load(sys.stdin)["SSHUser"])')
   if [ $targetos = "ubuntu" ]; then
@@ -111,5 +112,7 @@ if [ $isContainerless = "true" ]; then
   docker exec $icmname /root/install-apps.sh $icmdata
   # verification
 fi
+
+# Install Verification Program
 ip=$(docker exec $icmname sh -c "cd $icmdata; icm ps -json > /dev/null; cat response.json" | python3 decode-dmname.py)
 curl -H "Content-Type: application/json; charset=UTF-8" -H "Accept:application/json" "http://$ip:52773/csp/myapp/get" --user "SuperUser:sys"

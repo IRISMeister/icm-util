@@ -7,5 +7,9 @@
 		"Role": "DS",
 		"Count": "2",
 		"StartCount": "2"
-	}	
+	},
+    {
+	    "Role": "VM",
+	    "Count": "1"
+    }		
 ]

@@ -3,6 +3,9 @@
 pubip.txt
 privateip.txt
 res.json
+ps.json
+inventory.json
+remote-exec.sh
 .vscode
 cmd.sh
 *dont-upload*
