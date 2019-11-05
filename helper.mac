@@ -1,6 +1,6 @@
 ROUTINE helper
- Set privateip="/tmp/privateip.txt"
- Set pubip="/tmp/pubip.txt"
+ Set privateip="/tmp/privateip-ds.txt"
+ Set pubip="/tmp/pubip-ds.txt"
  Set ns="MYAPP"
 
  Do $SYSTEM.Sharding.ListShards()

@@ -14,9 +14,9 @@ https://docs.microsoft.com/ja-jp/azure/virtual-machines/windows/disks-types#prem
 
 typical things to do next.  
 ```
-cat res.json (to see public IP)
+cat inventory.json (to see public IP)
 
-docker cp myicm:/Samples/ssh/insecure ~/
+cp Backup/ssh/insecure ~
 cd ~
 chmod 700 insecure
 ```
@@ -44,6 +44,12 @@ Monitor database activity
 %SYS>D ^mgstat(1)
 ```
 Results will be stored at /irissys/data/IRIS/mgr/*.mgst
+
+```
+%SYS>D ^SystemPerformance
+%SYS>D Stop^SystemPerformance("20111220_1327_12hours",0)
+```
+Results will be stored at /irissys/data/IRIS/mgr/*.htm
 
 ```
 tail -f /irissys/data/IRIS/mgr/messages.log

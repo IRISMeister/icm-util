@@ -1,7 +1,7 @@
 **/iris.key
 **/*.gz
-pubip.txt
-privateip.txt
+pubip*.txt
+privateip*.txt
 res.json
 ps.json
 inventory.json
@@ -13,3 +13,4 @@ cmd.sh
 **/iris-normal.key
 icmcl-atelier-prj/User/
 Backup/*/
+install-apps-user.sh
