@@ -27,13 +27,8 @@ if [ $isContainerless = "true" ]; then
   fi
 fi
 
-rm -f privateip-ds.txt 
-rm -f pubip-ds.txt
-rm -f privateip-all.txt
-rm -f pubip-all.txt
 rm -f inventory.json
 rm -f ps.json
-rm -f cmd-ds.sh
 
 # Don't re-use the container
 docker stop $icmname | true
@@ -81,55 +76,14 @@ cp ./Backup/ssh/insecure ~/
 
 docker exec $icmname sh -c "cd $icmdata; icm inventory -json > /dev/null; cat response.json" > inventory.json
 docker exec $icmname sh -c "cd $icmdata; icm ps -json > /dev/null; cat response.json" > ps.json
-# ++ containerless ICM uses public ip for shard members. I want to avoid it. ++
-# Since 2019.4, it uses internal IPs.
-# try to get private IPs
-if [ $forceinternalip = "1" ]; then
-  docker exec $icmname sh -c "cd $icmdata; icm ps -json > /dev/null; cat response.json" | python3 decode-pubip-ds.py > pubip-ds.txt
-  # get SSHUser
-  sshusername=$(cat $provider/$targetos/$defaults | python3 -c 'import json,sys; print (json.load(sys.stdin)["SSHUser"])')
-  if [ $targetos = "ubuntu" ]; then
-    ip=ip
-  fi
-  if [ $targetos = "centos" ]; then
-    ip=/usr/sbin/ip
-  fi
-  if [ $targetos = "redhat" ]; then
-    ip=/usr/sbin/ip
-  fi
-
-  if [ -e cmd-ds.sh ]; then
-    rm cmd-ds.sh
-  fi
-  while read hostipaddress
-  do
-    if [ $provider = "aws" ]; then
-      printf "docker exec $icmname sh -c \"ssh -i /Samples/ssh/insecure -oStrictHostKeyChecking=no $sshusername@$hostipaddress 'curl -s http://169.254.169.254/latest/meta-data/local-ipv4'; echo ''\"\n" >> cmd-ds.sh
-    fi
-    if [ $provider = "azure" ]; then
-      printf "docker exec myicm sh -c \"ssh -i /Samples/ssh/insecure -oStrictHostKeyChecking=no $sshusername@$hostipaddress $ip -4 -br a show dev eth0 | awk '{ print \\\$3}' | awk -F'/' '{ print \\\$1 }'\"\n" >> cmd-ds.sh
-    fi
-  done < ./pubip-ds.txt
-  if [ -e cmd-ds.sh ]; then
-    chmod +x cmd-ds.sh
-    ./cmd-ds.sh > privateip-ds.txt
-    # copy ip infos to DM to run helper routine which deassigns/assigns shards.
-    docker cp pubip-ds.txt $icmname:/root
-    docker cp privateip-ds.txt $icmname:/root
-    docker cp helper.mac $icmname:/root
-    docker cp reassign-shard.sh $icmname:/root
-    docker exec $icmname /root/reassign-shard.sh $icmdata
-  fi
-fi
-# -- containerless ICM uses public ip for shard members. I want to avoid it. --
 
 # install ivp app classes, if Containerless
 if [ $isContainerless = "true" ]; then
   docker cp install-ivp.sh $icmname:/root
   docker cp icmcl-atelier-prj $icmname:/root
   docker exec $icmname /root/install-ivp.sh $icmdata
-  ip=$(docker exec $icmname sh -c "cd $icmdata; icm ps -json > /dev/null; cat response.json" | python3 decode-dmname.py)
-  curl -H "Content-Type: application/json; charset=UTF-8" -H "Accept:application/json" "http://$ip:52773/csp/myapp/get" --user "SuperUser:sys"
+  ip=$(cat inventory.json | jq -r '.[] | select(.Role == "BH") | .DNSName')
+  curl -H "Content-Type: application/json; charset=UTF-8" -H "Accept:application/json" "http://$ip:52774/csp/myapp/get" --user "SuperUser:sys"
 fi
 
 # Assuming no need to do this for container version because apps come along.

@@ -2,5 +2,9 @@
     {
 	    "Role": "DM",
 	    "Count": "1"
+    },
+    {
+	    "Role": "BH",
+	    "Count": "1"
     }
 ]

@@ -9,7 +9,7 @@
 		"StartCount": "2"
 	},
     {
-	    "Role": "VM",
+	    "Role": "BH",
 	    "Count": "1"
     }		
 ]

@@ -23,4 +23,3 @@ export provider=azure
 # centos,ubuntu.redhat
 export targetos=redhat
 export icmdata=/Production/$provider
-export forceinternalip=0
