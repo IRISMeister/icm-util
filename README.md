@@ -1,5 +1,5 @@
 # icm-containerless
-Tested under V2019.1.0.510.4  
+Tested under V2019.4.0.379.0
 To run  
 ./run.sh  
 To remove  
@@ -14,7 +14,7 @@ https://docs.microsoft.com/ja-jp/azure/virtual-machines/windows/disks-types#prem
 
 typical things to do next.  
 ```
-cat inventory.json (to see public IP)
+cat inventory.json (to see IP addresses)
 
 cp Backup/ssh/insecure ~
 cd ~
