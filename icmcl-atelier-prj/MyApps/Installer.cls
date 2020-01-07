@@ -6,6 +6,13 @@ XData setup [ XMLNamespace = INSTALLER ]
 <Manifest>
 <Var Name="Namespace" Value="myapp"/>
 
+<If Condition='(##class(Config.Namespaces).Exists("${Namespace}")=0)'>
+  <Namespace Name="${Namespace}" Create="yes" Code="${Namespace}" Ensemble="0" Data="${Namespace}">
+    <Configuration>
+      <Database Name="${Namespace}" Dir="${MGRDIR}${Namespace}" Create="overwrite" Resource="%DB_${Namespace}"/>
+    </Configuration>
+  </Namespace>    
+</If>
 <Namespace Name="${Namespace}" Create="no">
   <CSPApplication Url="/csp/${Namespace}" Directory="${CSPDIR}${Namespace}" Resource=""/>
   <Import File="/tmp/prj/" Flags="ck" Recurse="true"/>
