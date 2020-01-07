@@ -1,12 +1,11 @@
-# icm-containerless
+# icm-util
 Tested under V2019.4.0.379.0
 To run  
 ./run.sh  
 To remove  
-./rm.sh  
+./rm.sh containerName
 
 **Do not leave value of "ISCPassword" in defaults.json as is !!!**
-
 
 Disk size is defined by "DataVolumeSize": "1024" in defaults.json
 Disk performance is constrained by Disk size + Disk type. See

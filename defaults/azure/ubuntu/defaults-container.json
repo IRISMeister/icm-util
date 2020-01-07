@@ -12,6 +12,7 @@
     "LicenseKey": "iris.key",
     "LicenseDir": "/Production/license/",
     "Location": "japaneast",
+    "Zone": "1,2",
     "TimeZone": "America/New_York",
     "PublisherName": "Canonical",
     "Offer": "UbuntuServer",
@@ -25,18 +26,16 @@
     "ClientSecret": "xxxxx",
     "TenantId": "xxxxx",
     "DockerVersion":"18.06.1~ce~3-0~ubuntu",
-    "DockerImage": "xxxxx",
+    "DockerImage": "xxxxx/iris:2019.4.0.383.0",
     "DockerUsername": "xxxxx",
     "DockerPassword": "xxxxx",
     "ISCPassword": "sys",
     "Namespace": "MYAPP",
     "Mirror": "false",
-    "Spark": "false",
     "ISCglobals": "0,0,64,0,0,0",
     "ISCroutines": "64",
-    "ISCgmheap": "375680",
-    "ISClocksiz": "11796480"
-
+    "ISCgmheap": "37568",
+    "ISClocksiz": "16777216"
 }
 
 

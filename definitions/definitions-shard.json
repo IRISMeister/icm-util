@@ -7,9 +7,5 @@
 		"Role": "DS",
 		"Count": "2",
 		"StartCount": "2"
-	},
-    {
-	    "Role": "BH",
-	    "Count": "1"
-    }		
+	}
 ]

@@ -1,0 +1,16 @@
+[ {
+  "MachineName" : "MyIRISRAW-DATA-TEST-0001",
+  "Role" : "DATA",
+  "IPAddress" : "3.112.214.37",
+  "DNSName" : "ec2-3-112-214-37.ap-northeast-1.compute.amazonaws.com"
+}, {
+  "MachineName" : "MyIRISRAW-DATA-TEST-0002",
+  "Role" : "DATA",
+  "IPAddress" : "52.194.252.182",
+  "DNSName" : "ec2-52-194-252-182.ap-northeast-1.compute.amazonaws.com"
+}, {
+  "MachineName" : "MyIRISRAW-DATA-TEST-0003",
+  "Role" : "DATA",
+  "IPAddress" : "18.179.198.229",
+  "DNSName" : "ec2-18-179-198-229.ap-northeast-1.compute.amazonaws.com"
+} ]

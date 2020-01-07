@@ -1,7 +1,12 @@
-#!/bin/bash
-source envs.sh
+#!/bin/bash -e
+if [ $# -ne 1 ]; then
+  echo "rm.sh containerName"
+  exit 1
+fi
+
+containerName=$1
 
 # cleanup cloud resources
-docker exec $icmname sh -c "cd $icmdata; icm unprovision -cleanUp -force; rm *.log"
-docker stop $icmname
-docker rm $icmname
+docker exec $containerName sh -c 'cd $(cat dir.txt); icm unprovision -cleanUp -force; rm *.log'
+docker stop $containerName
+docker rm $containerName

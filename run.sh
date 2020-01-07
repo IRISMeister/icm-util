@@ -1,9 +1,18 @@
 #!/bin/bash -e
 source envs.sh
 
-if [ ! -e license/$iriskey ]; then
-  echo "License key (iris.key) doesn't exist."
-  exit 1
+defaultspath=$defaultsroot/$provider/$targetos
+#use Label as a container name
+icmname=$(cat $defaultspath/$defaults | jq -r '.Label')
+
+# Is this Containerless or not?
+isContainerless=$(cat $defaultspath/$defaults | jq -r '.Containerless')
+
+if [ $isContainerless = "true" ]; then
+  if [ ! -e kits/$kitname ]; then
+    echo "Kit $kitname doesn't exist."
+    exit 1
+  fi
 fi
 
 if [ $provider = "aws" ]; then
@@ -13,19 +22,27 @@ if [ $provider = "aws" ]; then
   fi
 fi
 
-if [ ! -d $provider/$targetos ]; then
-    echo "json files directory doesn't exist."
+if [ ! -e $defaultspath/$defaults ]; then
+    echo "Requested defaults.json files doesn't exist."
     exit 1
 fi
 
-# Is this Containerless or not?
-isContainerless=$(cat $provider/$targetos/$defaults | python3 -c 'import json,sys; print (json.load(sys.stdin)["Containerless"])')
-if [ $isContainerless = "true" ]; then
-  if [ ! -e kits/$kitname ]; then
-    echo "Kit $kitname doesn't exist."
+if [ ! -e definitions/$definitions ]; then
+    echo "Requested definitions.json files doesn't exist."
     exit 1
-  fi
 fi
+
+if [ $isContainerless = "true" ]; then
+  iriskey=iris.key
+else
+  iriskey=iris-container.key
+fi
+
+if [ ! -e license/$iriskey ]; then
+  echo "License key (iris.key) doesn't exist."
+  exit 1
+fi
+
 
 rm -f inventory.json
 rm -f ps.json
@@ -38,15 +55,19 @@ docker run -d --name $icmname $icmimg tail -f /dev/null
 docker exec $icmname sh -c "keygenTLS.sh; keygenSSH.sh"
 docker exec $icmname mkdir -p /Production/license
 
-docker cp kits/$kitname $icmname:/root
+if [ $isContainerless = "true" ]; then
+  docker cp kits/$kitname $icmname:/root
+fi
 docker exec $icmname mkdir -p $icmdata
+docker exec $icmname sh -c "echo $icmdata > dir.txt"
 
 # replacing kitname 
 if [ $isContainerless = "true" ]; then
-  cat $provider/$targetos/$defaults | jq '.KitURL = "file://tmp/'$kitname'"' > real-$defaults
-  docker cp real-$defaults $icmname:$icmdata/defaults.json
+  cat $defaultspath/$defaults | jq '.KitURL = "file://tmp/'$kitname'"' > actual-$defaults
+  docker cp actual-$defaults $icmname:$icmdata/defaults.json
+  rm -f actual-$defaults
 else
-  docker cp $provider/$targetos/$defaults $icmname:$icmdata/defaults.json
+  docker cp $defaultspath/$defaults $icmname:$icmdata/defaults.json
 fi
 # pick a definitions.json to use here.
 docker cp definitions/$definitions $icmname:$icmdata/definitions.json
@@ -61,7 +82,7 @@ docker cp license/$iriskey $icmname:/Production/license/iris.key
 if [ $isContainerless = "true" ]; then
   docker exec $icmname sh -c "cd $icmdata; icm provision; icm scp -localPath /root/$kitname -remotePath /tmp; icm install"
 else
-  docker exec $icmname sh -c "cd $icmdata; icm provision; icm run"
+  docker exec $icmname sh -c "cd $icmdata; icm provision --verbose -force; icm run --verbose -force"
 fi
 
 rm -fR ./Backup/*
@@ -79,14 +100,27 @@ docker exec $icmname sh -c "cd $icmdata; icm ps -json > /dev/null; cat response.
 
 # install ivp app classes, if Containerless
 if [ $isContainerless = "true" ]; then
+  ip=$(cat inventory.json | jq -r '.[] | select(.Role == "BH") | .DNSName')
+  targetmachine=$(cat inventory.json | jq -r '.[] | select(.Role == "BH") | .MachineName')
+  if [ -z "$ip" ]; then
+    ip=$(cat inventory.json | jq -r '.[] | select(.Role == "DM") | .DNSName')
+    targetmachine=$(cat inventory.json | jq -r '.[] | select(.Role == "DM") | .MachineName')
+  fi
+  if [ -z "$ip" ]; then
+    ip=$(cat inventory.json | jq -r '.[0] | select(.Role == "DATA") | .DNSName')
+    targetmachine=$(cat inventory.json | jq -r '.[0] | select(.Role == "DATA") | .MachineName')
+  fi
+
   docker cp install-ivp.sh $icmname:/root
   docker cp icmcl-atelier-prj $icmname:/root
-  docker exec $icmname /root/install-ivp.sh $icmdata
-  ip=$(cat inventory.json | jq -r '.[] | select(.Role == "BH") | .DNSName')
-  curl -H "Content-Type: application/json; charset=UTF-8" -H "Accept:application/json" "http://$ip:52774/csp/myapp/get" --user "SuperUser:sys"
+  docker exec $icmname /root/install-ivp.sh $icmdata $targetmachine
+
+  curl -H "Content-Type: application/json; charset=UTF-8" -H "Accept:application/json" "http://$ip:52773/csp/myapp/get" --user "SuperUser:sys"
 fi
 
 # Assuming no need to do this for container version because apps come along.
 if [ -e install-apps-user.sh ]; then
   ./install-apps-user.sh $icmdata
 fi
+
+echo "Container ["$icmname"] has been created. To unprovision all resources, execute ./rm.sh "$icmname
