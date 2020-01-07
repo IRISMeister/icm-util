@@ -23,5 +23,5 @@
     "ISCPassword": "sys",
     "Namespace": "MYAPP",
     "Mirror": "false",
-    "UserCPF": "/Samples/mergefiles/merge.cpf"
+    "UserCPF": "/Production/mergefiles/merge.cpf"
 }

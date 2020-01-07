@@ -22,9 +22,5 @@
     "SystemMode": "TEST",
     "ISCPassword": "sys",
     "Namespace": "MYAPP",
-    "Mirror": "true",
-    "ISCglobals": "0,0,512,0,0,0",
-    "ISCroutines": "64",
-    "ISCgmheap": "37568",
-    "ISClocksiz": "16777216"
+    "Mirror": "true"
 }

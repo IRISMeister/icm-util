@@ -73,7 +73,8 @@ fi
 docker cp definitions/$definitions $icmname:$icmdata/definitions.json
 
 # pick a merge-cpf file to use here.
-docker cp $cpffile $icmname:/Samples/mergefiles/merge.cpf
+docker exec $icmname mkdir -p /Production/mergefiles
+docker cp $cpffile $icmname:/Production/mergefiles/merge.cpf
 
 # need to aquire a valid aws credential beforehand
 if [ $provider = "aws" ]; then

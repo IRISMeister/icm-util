@@ -31,11 +31,7 @@
     "DockerPassword": "xxxxx",
     "ISCPassword": "sys",
     "Namespace": "MYAPP",
-    "Mirror": "false",
-    "ISCglobals": "0,0,64,0,0,0",
-    "ISCroutines": "64",
-    "ISCgmheap": "37568",
-    "ISClocksiz": "16777216"
+    "Mirror": "false"
 }
 
 
