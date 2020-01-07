@@ -31,3 +31,5 @@ export definitions=definitions-shard-node.json
 #export definitions=definitions-standalone.json
 
 export icmdata=/Production/$provider
+
+export cpffile=UserCPF/merge.cpf
