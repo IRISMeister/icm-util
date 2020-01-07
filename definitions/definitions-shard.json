@@ -5,7 +5,6 @@
 	},
     {
 		"Role": "DS",
-		"Count": "2",
-		"StartCount": "2"
+		"Count": "2"
 	}
 ]
