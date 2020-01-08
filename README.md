@@ -5,6 +5,8 @@ To run
 To remove  
 ./rm.sh containerName
 
+You can use awscli.sh for AWS to see if any resoures are remained unexpectedly.  
+
 **Do not leave value of "ISCPassword" in defaults.json as is !!!**
 
 Disk size is defined by "DataVolumeSize": "1024" in defaults.json
@@ -18,11 +20,12 @@ cat inventory.json (to see IP addresses)
 cp Backup/ssh/insecure ~
 cd ~
 chmod 700 insecure
+ssh -i insecure ubuntu@ipaddress
+
 ```
 (copy something from local PC)  
 ```
 scp -r -i ~/insecure /mnt/c/temp/SpeedTestDemo ubuntu@ipaddress:/tmp
-ssh -i insecure ubuntu@ipaddress
 ```
 (copy something from remote)  
 ```

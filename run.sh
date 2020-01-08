@@ -124,7 +124,9 @@ fi
 
 # Assuming no need to do this for container version because apps come along.
 if [ -e install-apps-user.sh ]; then
-  ./install-apps-user.sh $icmdata
+  ./install-apps-user.sh $icmdata $targetmachine
 fi
 
 echo "Container ["$icmname"] has been created. To unprovision all resources, execute ./rm.sh "$icmname
+docker exec $icmname sh -c "cd $icmdata; icm inventory"
+docker exec $icmname sh -c "cd $icmdata; icm ps"
