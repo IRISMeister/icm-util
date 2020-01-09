@@ -124,7 +124,7 @@ fi
 
 # Assuming no need to do this for container version because apps come along.
 if [ -e install-apps-user.sh ]; then
-  ./install-apps-user.sh $icmdata $targetmachine
+  ./install-apps-user.sh $icmname $icmdata $targetmachine
 fi
 
 echo "Container ["$icmname"] has been created. To unprovision all resources, execute ./rm.sh "$icmname

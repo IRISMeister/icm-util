@@ -7,8 +7,9 @@ ps.json
 inventory.json
 remote-exec.sh
 .vscode
-cmd.sh
 *dont-upload*
 icmcl-atelier-prj/User/
 Backup/*/
 install-apps-user.sh
+install-apps-user-exec.sh
+src
