@@ -125,7 +125,7 @@ if [ $isContainerless = "true" ]; then
   curl -H "Content-Type: application/json; charset=UTF-8" -H "Accept:application/json" "http://$ip:52773/csp/myapp/get" --user "SuperUser:sys"
 fi
 
-# Assuming no need to do this for container version because apps come along.
+# Run user script if exists.
 if [ -e install-apps-user.sh ]; then
   ./install-apps-user.sh $icmname $icmdata $targetmachine $ip
 fi
