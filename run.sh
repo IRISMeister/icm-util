@@ -104,20 +104,20 @@ ps=Backup/$icmname/ps.json
 docker exec $icmname sh -c "cd $icmdata; icm inventory -json > /dev/null; cat response.json" > $inventory
 docker exec $icmname sh -c "cd $icmdata; icm ps -json > /dev/null; cat response.json" > $ps
 
+ip=$(cat $inventory | jq -r '.[] | select(.Role == "BH") | .DNSName')
+targetmachine=$(cat $inventory | jq -r '.[] | select(.Role == "BH") | .MachineName')
+if [ -z "$ip" ]; then
+  # Is it same to assume first DM is always mirror master at first?
+  ip=$(cat $inventory | jq -r '.[0] | select(.Role == "DM") | .DNSName')
+  targetmachine=$(cat $inventory | jq -r '.[0] | select(.Role == "DM") | .MachineName')
+fi
+if [ -z "$ip" ]; then
+  ip=$(cat $inventory | jq -r '.[0] | select(.Role == "DATA") | .DNSName')
+  targetmachine=$(cat $inventory | jq -r '.[0] | select(.Role == "DATA") | .MachineName')
+fi
+
 # install ivp app classes, if Containerless
 if [ $isContainerless = "true" ]; then
-  ip=$(cat $inventory | jq -r '.[] | select(.Role == "BH") | .DNSName')
-  targetmachine=$(cat $inventory | jq -r '.[] | select(.Role == "BH") | .MachineName')
-  if [ -z "$ip" ]; then
-    # Is it same to assume first DM is always mirror master at first?
-    ip=$(cat $inventory | jq -r '.[0] | select(.Role == "DM") | .DNSName')
-    targetmachine=$(cat $inventory | jq -r '.[] | select(.Role == "DM") | .MachineName')
-  fi
-  if [ -z "$ip" ]; then
-    ip=$(cat $inventory | jq -r '.[0] | select(.Role == "DATA") | .DNSName')
-    targetmachine=$(cat $inventory | jq -r '.[0] | select(.Role == "DATA") | .MachineName')
-  fi
-
   docker cp install-ivp.sh $icmname:/root
   docker cp icmcl-atelier-prj $icmname:/root
   docker exec $icmname /root/install-ivp.sh $icmdata $targetmachine
