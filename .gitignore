@@ -1,15 +1,12 @@
 license/*.key
 **/*.gz
-pubip*.txt
-privateip*.txt
 res.json
 ps.json
 inventory.json
-remote-exec.sh
 .vscode
-*dont-upload*
+defaults-dont-upload/
 icmcl-atelier-prj/User/
-Backup/*/
+Backup/
 install-apps-user.sh
 install-apps-user-exec.sh
 src

@@ -61,7 +61,7 @@ fi
 docker exec $icmname mkdir -p $icmdata
 docker exec $icmname sh -c "echo $icmdata > dir.txt"
 
-# replacing kitname 
+# replacing kitname if Containerless
 if [ $isContainerless = "true" ]; then
   cat $defaultspath/$defaults | jq '.KitURL = "file://tmp/'$kitname'"' > actual-$defaults
   docker cp actual-$defaults $icmname:$icmdata/defaults.json
@@ -80,39 +80,44 @@ docker cp $cpffile $icmname:/Production/mergefiles/merge.cpf
 if [ $provider = "aws" ]; then
   docker cp ~/.aws/credentials $icmname:$icmdata/credentials
 fi
-#; place your valid license key here
+#; copy a license key here
 docker cp license/$iriskey $icmname:/Production/license/iris.key
 
 if [ $isContainerless = "true" ]; then
   docker exec $icmname sh -c "cd $icmdata; icm provision; icm scp -localPath /root/$kitname -remotePath /tmp; icm install"
 else
-  docker exec $icmname sh -c "cd $icmdata; icm provision --verbose -force; icm run --verbose -force"
+  docker exec $icmname sh -c "cd $icmdata; icm provision; icm run"
+  #docker exec $icmname sh -c "cd $icmdata; icm provision --verbose -force; icm run --verbose -force"
 fi
 
-rm -fR ./Backup/*
+rm -fR ./Backup/$icmname/*
+mkdir ./Backup/$icmname
 # save ssh/tls folder(s) to local, just in case.
-docker cp $icmname:/Samples/ssh/ ./Backup/ssh
-docker cp $icmname:/Samples/tls/ ./Backup/tls
+docker cp $icmname:/Samples/ssh/ ./Backup/$icmname/ssh
+docker cp $icmname:/Samples/tls/ ./Backup/$icmname/tls
 # save Production folder(s) to local, just in case.
-docker cp $icmname:/$icmdata/ ./Backup/
+docker cp $icmname:/$icmdata/ ./Backup/$icmname/
 
-# private key causes protection issue on windows filesystem via wsl. So copy it to ~/.
-cp ./Backup/ssh/insecure ~/
+# ssh private key causes protection issue on windows filesystem via wsl. So copy it to ~/.
+cp ./Backup/$icmname/ssh/insecure ~/$icmname_insecure
 
-docker exec $icmname sh -c "cd $icmdata; icm inventory -json > /dev/null; cat response.json" > inventory.json
-docker exec $icmname sh -c "cd $icmdata; icm ps -json > /dev/null; cat response.json" > ps.json
+inventory=Backup/$icmname/inventory.json
+ps=Backup/$icmname/ps.json
+
+docker exec $icmname sh -c "cd $icmdata; icm inventory -json > /dev/null; cat response.json" > $inventory
+docker exec $icmname sh -c "cd $icmdata; icm ps -json > /dev/null; cat response.json" > $ps
 
 # install ivp app classes, if Containerless
 if [ $isContainerless = "true" ]; then
-  ip=$(cat inventory.json | jq -r '.[] | select(.Role == "BH") | .DNSName')
-  targetmachine=$(cat inventory.json | jq -r '.[] | select(.Role == "BH") | .MachineName')
+  ip=$(cat $inventory | jq -r '.[] | select(.Role == "BH") | .DNSName')
+  targetmachine=$(cat $inventory | jq -r '.[] | select(.Role == "BH") | .MachineName')
   if [ -z "$ip" ]; then
-    ip=$(cat inventory.json | jq -r '.[] | select(.Role == "DM") | .DNSName')
-    targetmachine=$(cat inventory.json | jq -r '.[] | select(.Role == "DM") | .MachineName')
+    ip=$(cat $inventory | jq -r '.[] | select(.Role == "DM") | .DNSName')
+    targetmachine=$(cat $inventory | jq -r '.[] | select(.Role == "DM") | .MachineName')
   fi
   if [ -z "$ip" ]; then
-    ip=$(cat inventory.json | jq -r '.[0] | select(.Role == "DATA") | .DNSName')
-    targetmachine=$(cat inventory.json | jq -r '.[0] | select(.Role == "DATA") | .MachineName')
+    ip=$(cat $inventory | jq -r '.[0] | select(.Role == "DATA") | .DNSName')
+    targetmachine=$(cat $inventory | jq -r '.[0] | select(.Role == "DATA") | .MachineName')
   fi
 
   docker cp install-ivp.sh $icmname:/root
@@ -124,7 +129,7 @@ fi
 
 # Assuming no need to do this for container version because apps come along.
 if [ -e install-apps-user.sh ]; then
-  ./install-apps-user.sh $icmname $icmdata $targetmachine
+  ./install-apps-user.sh $icmname $icmdata $targetmachine $ip
 fi
 
 echo "Container ["$icmname"] has been created. To unprovision all resources, execute ./rm.sh "$icmname

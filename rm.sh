@@ -10,3 +10,12 @@ containerName=$1
 docker exec $containerName sh -c 'cd $(cat dir.txt); icm unprovision -cleanUp -force; rm *.log'
 docker stop $containerName
 docker rm $containerName
+
+# remove backup files
+defaultspath=$defaultsroot/$provider/$targetos
+icmname=$(cat $defaultspath/$defaults | jq -r '.Label')
+rm -fR ./Backup/$icmname
+
+# remove a ssh key file
+rm -f ~/$icmname_insecure
+

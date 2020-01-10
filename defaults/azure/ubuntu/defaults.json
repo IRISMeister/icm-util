@@ -28,7 +28,8 @@
     "KitURL": "to_be_replaced_by_run.sh",
     "ISCPassword": "sys",
     "Namespace": "MYAPP",
-    "Mirror": "false"
+    "Mirror": "false",
+    "UserCPF": "/Production/mergefiles/merge.cpf"
 }
 
 
