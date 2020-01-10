@@ -4,16 +4,14 @@ if [ $# -ne 1 ]; then
   exit 1
 fi
 
-containerName=$1
+icmname=$1
 
 # cleanup cloud resources
-docker exec $containerName sh -c 'cd $(cat dir.txt); icm unprovision -cleanUp -force; rm *.log'
-docker stop $containerName
-docker rm $containerName
+docker exec $icmname sh -c 'cd $(cat dir.txt); icm unprovision -cleanUp -force; rm *.log'
+docker stop $icmname
+docker rm $icmname
 
 # remove backup files
-defaultspath=$defaultsroot/$provider/$targetos
-icmname=$(cat $defaultspath/$defaults | jq -r '.Label')
 rm -fR ./Backup/$icmname
 
 # remove a ssh key file
