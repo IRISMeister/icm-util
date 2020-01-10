@@ -109,7 +109,8 @@ if [ $isContainerless = "true" ]; then
   ip=$(cat $inventory | jq -r '.[] | select(.Role == "BH") | .DNSName')
   targetmachine=$(cat $inventory | jq -r '.[] | select(.Role == "BH") | .MachineName')
   if [ -z "$ip" ]; then
-    ip=$(cat $inventory | jq -r '.[] | select(.Role == "DM") | .DNSName')
+    # Is it same to assume first DM is always mirror master at first?
+    ip=$(cat $inventory | jq -r '.[0] | select(.Role == "DM") | .DNSName')
     targetmachine=$(cat $inventory | jq -r '.[] | select(.Role == "DM") | .MachineName')
   fi
   if [ -z "$ip" ]; then
