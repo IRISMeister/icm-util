@@ -43,10 +43,6 @@ if [ ! -e license/$iriskey ]; then
   exit 1
 fi
 
-
-rm -f inventory.json
-rm -f ps.json
-
 # Don't re-use the container
 docker stop $icmname | true
 docker rm $icmname | true
@@ -99,7 +95,7 @@ docker cp $icmname:/Samples/tls/ ./Backup/$icmname/tls
 docker cp $icmname:/$icmdata/ ./Backup/$icmname/
 
 # ssh private key causes protection issue on windows filesystem via wsl. So copy it to ~/.
-cp ./Backup/$icmname/ssh/insecure ~/$icmname_insecure
+cp ./Backup/$icmname/ssh/insecure ~/insecure_$icmname
 
 inventory=Backup/$icmname/inventory.json
 ps=Backup/$icmname/ps.json

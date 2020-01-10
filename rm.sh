@@ -17,5 +17,5 @@ icmname=$(cat $defaultspath/$defaults | jq -r '.Label')
 rm -fR ./Backup/$icmname
 
 # remove a ssh key file
-rm -f ~/$icmname_insecure
+rm -f ~/insecure_$icmname
 
