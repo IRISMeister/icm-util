@@ -96,6 +96,7 @@ docker cp $icmname:/$icmdata/ ./Backup/$icmname/
 
 # ssh private key causes protection issue on windows filesystem via wsl. So copy it to ~/.
 cp ./Backup/$icmname/ssh/insecure ~/insecure_$icmname
+chmod 600 ~/insecure_$icmname
 
 inventory=Backup/$icmname/inventory.json
 ps=Backup/$icmname/ps.json
@@ -120,6 +121,7 @@ if [ $isContainerless = "true" ]; then
   docker cp icmcl-atelier-prj $icmname:/root
   docker exec $icmname /root/install-ivp.sh $icmdata $targetmachine
 
+  echo "Accessing "$ip
   curl -H "Content-Type: application/json; charset=UTF-8" -H "Accept:application/json" "http://$ip:52773/csp/myapp/get" --user "SuperUser:sys"
 fi
 
