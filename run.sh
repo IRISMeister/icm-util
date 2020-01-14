@@ -43,6 +43,8 @@ if [ ! -e license/$iriskey ]; then
   exit 1
 fi
 
+echo "Provider:"$provider" os:"$targetos" isContainerless:"$isContainerless" container name:"$icmname
+
 # Don't re-use the container
 docker stop $icmname | true
 docker rm $icmname | true
@@ -65,10 +67,10 @@ if [ $isContainerless = "true" ]; then
 else
   docker cp $defaultspath/$defaults $icmname:$icmdata/defaults.json
 fi
-# pick a definitions.json to use here.
+# copy a definitions.json to use
 docker cp definitions/$definitions $icmname:$icmdata/definitions.json
 
-# pick a merge-cpf file to use here.
+# copy a merge-cpf file to use
 docker exec $icmname mkdir -p /Production/mergefiles
 docker cp $cpffile $icmname:/Production/mergefiles/merge.cpf
 
@@ -76,14 +78,13 @@ docker cp $cpffile $icmname:/Production/mergefiles/merge.cpf
 if [ $provider = "aws" ]; then
   docker cp ~/.aws/credentials $icmname:$icmdata/credentials
 fi
-#; copy a license key here
+#; copy a license key
 docker cp license/$iriskey $icmname:/Production/license/iris.key
 
 if [ $isContainerless = "true" ]; then
   docker exec $icmname sh -c "cd $icmdata; icm provision; icm scp -localPath /root/$kitname -remotePath /tmp; icm install"
 else
   docker exec $icmname sh -c "cd $icmdata; icm provision; icm run"
-  #docker exec $icmname sh -c "cd $icmdata; icm provision --verbose -force; icm run --verbose -force"
 fi
 
 rm -fR ./Backup/$icmname/*
