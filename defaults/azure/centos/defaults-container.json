@@ -22,16 +22,17 @@
     "Size": "Standard_DS3_v2",
     "AccountReplicationType": "LRS",
     "AccountTier": "Premium",
-    "SubscriptionId": "xxxxx",
-    "ClientId": "xxxxx",
-    "ClientSecret": "xxxxx",
-    "TenantId": "xxxxx",
-    "DockerImage": "xxxxx/iris:2019.4.0.383.0",
-    "DockerUsername": "xxxxx",
-    "DockerPassword": "xxxxx",
+    "SubscriptionId": "to_be_replaced_by_run.sh",
+    "ClientId": "to_be_replaced_by_run.sh",
+    "ClientSecret": "to_be_replaced_by_run.sh",
+    "TenantId": "to_be_replaced_by_run.sh",
+    "DockerImage": "intersystems/iris:2019.4.0.383.0",
+    "DockerUsername": "to_be_replaced_by_run.sh",
+    "DockerPassword": "to_be_replaced_by_run.sh",
     "ISCPassword": "sys",
     "Namespace": "MYAPP",
-    "Mirror": "false"
+    "Mirror": "false",
+    "UserCPF": "/Production/mergefiles/merge.cpf"
 }
 
 

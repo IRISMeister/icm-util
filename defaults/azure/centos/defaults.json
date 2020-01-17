@@ -1,7 +1,7 @@
 {
     "Containerless": "true",
     "Provider": "Azure",
-    "Label": "MyIRIS",
+    "Label": "MyIRISRAW",
     "Tag": "PROD",
     "DataVolumeSize": "20",
     "SSHPrivateKey": "/Samples/ssh/insecure",
@@ -22,14 +22,15 @@
     "Size": "Standard_DS3_v2",
     "AccountReplicationType": "LRS",
     "AccountTier": "Premium",
-    "SubscriptionId": "xxxxx",
-    "ClientId": "xxxxx",
-    "ClientSecret": "xxxxx",
-    "TenantId": "xxxxx",
+    "SubscriptionId": "to_be_replaced_by_run.sh",
+    "ClientId": "to_be_replaced_by_run.sh",
+    "ClientSecret": "to_be_replaced_by_run.sh",
+    "TenantId": "to_be_replaced_by_run.sh",
     "KitURL": "to_be_replaced_by_run.sh",
     "ISCPassword": "sys",
     "Namespace": "MYAPP",
-    "Mirror": "false"
+    "Mirror": "false",
+    "UserCPF": "/Production/mergefiles/merge.cpf"
 }
 
 

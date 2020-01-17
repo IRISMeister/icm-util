@@ -1,17 +1,46 @@
 # icm-util
-Tested under V2019.4.0.379.0
+Tested under V2019.4.0.383.0
+
+# Before running
+Edit envs.sh to meet your purpose.
+```
+vi envs.sh
+```
+
+If you are using Azure or Container version on any cloud you need to performe the following. These file are subject to be mergerd with defaults.json file when run.
+- Provide azure access keys.
+```
+cp secret/azure-secret.json.template secret/azure-secret.json
+vi secret/azure-secret.json
+```
+- Provide docker user/password and docker image info.  
+If you do not want to override DockerImage in defaults.json file, remove it from docker-secret.json.
+```
+cp secret/docker-secret.json.template secret/docker-secret.json
+vi secret/docker-secret.json
+```
+**Do not leave value of "ISCPassword" in defaults.json as is because it is too obvious!!!**  
+defaults.json files are localted under provider/os/.  So If you are using ubuntu on aws, it will be aws/os/defaults*.json
+```
+vi which_ever_defaults_file_you_may_use.json
+```
+
+
+# How to Run
 To run  
+```
 ./run.sh  
+```
 To remove  
+```
 ./rm.sh containerName
+```
 
 You can use awscli.sh for AWS to see if any resoures are remained unexpectedly.  
 
-**Do not leave value of "ISCPassword" in defaults.json as is !!!**
-
-Disk size is defined by "DataVolumeSize": "1024" in defaults.json
-Disk performance is constrained by Disk size + Disk type. See
-https://docs.microsoft.com/ja-jp/azure/virtual-machines/windows/disks-types#premium-ssd
+Disk size is defined by "DataVolumeSize": "1024" in defaults.json.  
+Typically disk performance is constrained by Disk size + Disk type.  
+see https://docs.microsoft.com/ja-jp/azure/virtual-machines/windows/disks-types#premium-ssd
 
 typical things to do next.  
 ```
@@ -21,7 +50,6 @@ cp Backup/ssh/insecure ~
 cd ~
 chmod 700 insecure
 ssh -i insecure ubuntu@ipaddress
-
 ```
 (copy something from local PC)  
 ```

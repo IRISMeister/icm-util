@@ -21,8 +21,8 @@ export defaultsroot=defaults
 #export defaultsroot=defaults-dont-upload
 
 export defaults=defaults.json
+#export defaults=defaults-container.json
 #export defaults=defaults-mirror.json
-#export defaults=defaults-container-dont-upload.json
 
 #export definitions=definitions.json
 #export definitions=definitions-mirror.json

@@ -15,13 +15,6 @@ if [ $isContainerless = "true" ]; then
   fi
 fi
 
-if [ $provider = "aws" ]; then
-  if [ ! -e ~/.aws/credentials ]; then
-    echo "AWS credential doesn't exist."
-    exit 1
-  fi
-fi
-
 if [ ! -e $defaultspath/$defaults ]; then
     echo "Requested defaults.json files doesn't exist."
     exit 1
@@ -43,6 +36,13 @@ if [ ! -e license/$iriskey ]; then
   exit 1
 fi
 
+if [ $provider = "aws" ]; then
+  if [ ! -e ~/.aws/credentials ]; then
+    echo "AWS credential doesn't exist."
+    exit 1
+  fi
+fi
+
 echo "Provider:"$provider" os:"$targetos" isContainerless:"$isContainerless" container name:"$icmname
 
 # Don't re-use the container
@@ -59,14 +59,31 @@ fi
 docker exec $icmname mkdir -p $icmdata
 docker exec $icmname sh -c "echo $icmdata > dir.txt"
 
-# replacing kitname if Containerless
-if [ $isContainerless = "true" ]; then
-  cat $defaultspath/$defaults | jq '.KitURL = "file://tmp/'$kitname'"' > actual-$defaults
-  docker cp actual-$defaults $icmname:$icmdata/defaults.json
-  rm -f actual-$defaults
-else
-  docker cp $defaultspath/$defaults $icmname:$icmdata/defaults.json
+# modify defaults.json if azure
+cp $defaultspath/$defaults tmp-$defaults
+if [ $provider = "azure" ]; then
+  if [ -e secret/azure-secret.json ]; then
+    jq -s '.[0]*.[1]' $defaultspath/$defaults secret/azure-secret.json > tmp-$defaults
+  fi
 fi
+
+# replacing kitname if Containerless, replacing DockerUsername,DockerPassword if Container.
+if [ $isContainerless = "true" ]; then
+  cat tmp-$defaults | jq '.KitURL = "file://tmp/'$kitname'"' > actual-$defaults
+  docker cp actual-$defaults $icmname:$icmdata/defaults.json
+else
+  if [ -e secret/docker-secret.json ]; then
+    jq -s '.[0]*.[1]' tmp-$defaults secret/docker-secret.json > actual-$defaults
+    docker cp actual-$defaults $icmname:$icmdata/defaults.json
+  else
+    docker cp tmp-$defaults $icmname:$icmdata/defaults.json
+  fi
+fi
+
+rm -f tmp-$defaults
+rm -f actual-$defaults
+
+
 # copy a definitions.json to use
 docker cp definitions/$definitions $icmname:$icmdata/definitions.json
 

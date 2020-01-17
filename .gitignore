@@ -10,4 +10,7 @@ Backup/
 install-apps-user.sh
 install-apps-user-exec.sh
 src
-actual*
+actual-*
+tmp-*
+secret/azure-secret.json
+secret/docker-secret.json
