@@ -152,3 +152,4 @@ fi
 echo "Container ["$icmname"] has been created. To unprovision all resources, execute ./rm.sh "$icmname
 docker exec $icmname sh -c "cd $icmdata; icm inventory"
 docker exec $icmname sh -c "cd $icmdata; icm ps"
+echo " Management Portal available at: http://$ip:52773/csp/sys/UtilHome.csp"
