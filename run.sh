@@ -125,7 +125,7 @@ docker exec $icmname sh -c "cd $icmdata; icm ps -json > /dev/null; cat response.
 ip=$(cat $inventory | jq -r '.[] | select(.Role == "BH") | .DNSName')
 targetmachine=$(cat $inventory | jq -r '.[] | select(.Role == "BH") | .MachineName')
 if [ -z "$ip" ]; then
-  # Is it same to assume first DM is always mirror master at first?
+  # Is it safe to assume first DM is always mirror master at first?
   ip=$(cat $inventory | jq -r '.[0] | select(.Role == "DM") | .DNSName')
   targetmachine=$(cat $inventory | jq -r '.[0] | select(.Role == "DM") | .MachineName')
 fi
@@ -145,11 +145,19 @@ if [ $isContainerless = "true" ]; then
 fi
 
 # Run user script if exists.
-if [ -e install-apps-user.sh ]; then
-  ./install-apps-user.sh $icmname $icmdata $targetmachine $ip
+if [ -e app/install-apps-user.sh ]; then
+  app/install-apps-user.sh $icmname $icmdata $targetmachine $ip
 fi
 
-echo "Container ["$icmname"] has been created. To unprovision all resources, execute ./rm.sh "$icmname
 docker exec $icmname sh -c "cd $icmdata; icm inventory"
 docker exec $icmname sh -c "cd $icmdata; icm ps"
+echo "Container ["$icmname"] has been created. To unprovision all resources, execute ./rm.sh "$icmname
 echo " Management Portal available at: http://$ip:52773/csp/sys/UtilHome.csp"
+
+sshuser=$(cat $defaultsroot/$provider/$targetos/$defaults | jq -r '.SSHUser')
+echo " ssh -i Backup/$icmname/ssh/insecure -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $sshuser@$ip to login."
+
+echo '$ip': $ip >> Backup/$icmname/variables
+echo '$icmname': $icmname >> Backup/$icmname/variables
+echo '$icmdata': $icmdata >> Backup/$icmname/variables
+echo '$targetmachine': $targetmachine >> Backup/$icmname/variables
