@@ -31,7 +31,7 @@ else
   iriskey=iris-container.key
 fi
 
-if [ ! -e license/$iriskey ]; then
+if [ ! -e irislicense/$iriskey ]; then
   echo "License key (iris.key) doesn't exist."
   exit 1
 fi
@@ -96,7 +96,7 @@ if [ $provider = "aws" ]; then
   docker cp ~/.aws/credentials $icmname:$icmdata/credentials
 fi
 #; copy a license key
-docker cp license/$iriskey $icmname:/Production/license/iris.key
+docker cp irislicense/$iriskey $icmname:/Production/license/iris.key
 
 if [ $isContainerless = "true" ]; then
   docker exec $icmname sh -c "cd $icmdata; icm provision; icm scp -localPath /root/$kitname -remotePath /tmp; icm install"
@@ -122,13 +122,15 @@ ps=Backup/$icmname/ps.json
 docker exec $icmname sh -c "cd $icmdata; icm inventory -json > /dev/null; cat response.json" > $inventory
 docker exec $icmname sh -c "cd $icmdata; icm ps -json > /dev/null; cat response.json" > $ps
 
-ip=$(cat $inventory | jq -r '.[] | select(.Role == "BH") | .DNSName')
-targetmachine=$(cat $inventory | jq -r '.[] | select(.Role == "BH") | .MachineName')
-if [ -z "$ip" ]; then
-  # Is it safe to assume first DM is always mirror master at first?
-  ip=$(cat $inventory | jq -r '.[0] | select(.Role == "DM") | .DNSName')
-  targetmachine=$(cat $inventory | jq -r '.[0] | select(.Role == "DM") | .MachineName')
-fi
+bastionip=$(cat $inventory | jq -r '.[] | select(.Role == "BH") | .DNSName')
+bastiontargetmachine=$(cat $inventory | jq -r '.[] | select(.Role == "BH") | .MachineName')
+
+# looking for an appropriate IRIS to install IVP.
+# Is it safe to assume the first DM is always mirror master at first?
+# TODO: Need a better way to find it. If BH exists, it fails...
+# Use ... cat test.inventory | jq -r '.[] | select(.Role == "DATA") | .MachineName'
+ip=$(cat $inventory | jq -r '.[0] | select(.Role == "DM") | .DNSName')
+targetmachine=$(cat $inventory | jq -r '.[0] | select(.Role == "DM") | .MachineName')
 if [ -z "$ip" ]; then
   ip=$(cat $inventory | jq -r '.[0] | select(.Role == "DATA") | .DNSName')
   targetmachine=$(cat $inventory | jq -r '.[0] | select(.Role == "DATA") | .MachineName')

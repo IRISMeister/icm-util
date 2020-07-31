@@ -1,4 +1,4 @@
-license/*.key
+irislicense/*.key
 **/*.gz
 res.json
 ps.json
