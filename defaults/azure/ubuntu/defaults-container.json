@@ -30,7 +30,7 @@
     "ClientSecret": "to_be_replaced_by_run.sh",
     "TenantId": "to_be_replaced_by_run.sh",
     "DockerVersion":"18.06.1~ce~3-0~ubuntu",
-    "DockerImage": "intersystems/iris:2019.4.0.383.0",
+    "DockerImage": "to_be_replaced_by_run.sh",
     "DockerUsername": "to_be_replaced_by_run.sh",
     "DockerPassword": "to_be_replaced_by_run.sh",
     "ISCPassword": "sys",
