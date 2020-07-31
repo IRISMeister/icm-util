@@ -26,13 +26,13 @@ export defaults=defaults.json
 #export defaults=defaults-container.json
 #export defaults=defaults-mirror.json
 
-export definitions=definitions-bh.json
-#export definitions=definitions.json
+export definitions=definitions.json
+#export definitions=definitions-bh.json
 #export definitions=definitions-mirror.json
 #export definitions=definitions-shard.json
 #export definitions=definitions-shard-node.json
 
 export icmdata=/Production/$provider
 
-#export cpffile=UserCPF/merge.cpf
-export cpffile=UserCPF/merge-min.cpf
+export cpffile=UserCPF/merge.cpf
+#export cpffile=UserCPF/merge-min.cpf
