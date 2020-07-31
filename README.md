@@ -51,6 +51,21 @@ cd ~
 chmod 700 insecure
 ssh -i insecure ubuntu@ipaddress
 ```
+If BH is in place, you need to use following ssh syntax (ip/host are masked by 'x')
+```
+Machine                        IP Address       DNS Name                                 Provider Region     Zone
+-------                        ----------       --------                                 -------- ------     ----
+MyIRISRAW-BH-TEST-0001         54.250.x.x   ec2-54-250-x-x.ap-northeast-1.comput AWS      ap-northeast-1 a
+MyIRISRAW-DM-TEST-0001         10.0.x.x     10.0.x.x                             AWS      ap-northeast-1 a
+```
+```
+ssh -i insecure -oProxyCommand='ssh -i insecure -W %h:%p ubuntu@ec2-54-250-x-x.ap-northeast-1.compute.amazonaws.com' ubuntu@10.0.x.x
+```
+If you want to see which ports on BH will be forwarded to where, see configBastion.log on BH.
+```
+ssh -i insecure ubuntu@54.250.x.x cat configBastion.log
+
+```
 (copy something from local PC)  
 ```
 scp -r -i ~/insecure /mnt/c/temp/SpeedTestDemo ubuntu@ipaddress:/tmp

@@ -13,3 +13,4 @@ tmp-*
 secret/azure-secret.json
 secret/docker-secret.json
 app/*
+test.inventory
