@@ -95,11 +95,18 @@ docker cp $cpffile $icmname:/Production/mergefiles/merge.cpf
 if [ $provider = "aws" ]; then
   docker cp ~/.aws/credentials $icmname:$icmdata/credentials
 fi
-#; copy a license key
+# copy a license key
 docker cp irislicense/$iriskey $icmname:/Production/license/iris.key
 
 if [ $isContainerless = "true" ]; then
-  docker exec $icmname sh -c "cd $icmdata; icm provision; icm scp -localPath /root/$kitname -remotePath /tmp; icm install"
+  # If you have a faster way to upload a kit, use it.
+  if [ -e fast_kit_uploader.sh ]; then
+    docker exec $icmname sh -c "cd $icmdata; icm provision"
+    ./fast_kit_uploader.sh $icmname $icmdata $kitname
+    docker exec $icmname sh -c "cd $icmdata; icm install"
+  else
+    docker exec $icmname sh -c "cd $icmdata; icm provision; icm scp -localPath /root/$kitname -remotePath /tmp; icm install"
+  fi
 else
   docker exec $icmname sh -c "cd $icmdata; icm provision; icm run"
 fi
@@ -122,28 +129,48 @@ ps=Backup/$icmname/ps.json
 docker exec $icmname sh -c "cd $icmdata; icm inventory -json > /dev/null; cat response.json" > $inventory
 docker exec $icmname sh -c "cd $icmdata; icm ps -json > /dev/null; cat response.json" > $ps
 
+# Does BH exist?
 bastionip=$(cat $inventory | jq -r '.[] | select(.Role == "BH") | .DNSName')
 bastiontargetmachine=$(cat $inventory | jq -r '.[] | select(.Role == "BH") | .MachineName')
 
 # looking for an appropriate IRIS to install IVP.
-# Is it safe to assume the first DM is always mirror master at first?
-# TODO: Need a better way to find it. If BH exists, it fails...
-# Use ... cat test.inventory | jq -r '.[] | select(.Role == "DATA") | .MachineName'
-ip=$(cat $inventory | jq -r '.[0] | select(.Role == "DM") | .DNSName')
-targetmachine=$(cat $inventory | jq -r '.[0] | select(.Role == "DM") | .MachineName')
+# Is it safe to assume the first DM is always mirror master?
+ip=$(cat $inventory | jq -r '.[] | select(.Role == "DM") | .DNSName')
+targetmachine=$(cat $inventory | jq -r '.[] | select(.Role == "DM") | .MachineName')
+iparr=($ip)
+if [ -n "${iparr[0]}" ]; then
+  ip=${iparr[0]}
+  tgtarr=($targetmachine)
+  targetmachine=${tgtarr[0]}
+fi
+
+# if there is no DM, use the first DATA node.
 if [ -z "$ip" ]; then
-  ip=$(cat $inventory | jq -r '.[0] | select(.Role == "DATA") | .DNSName')
-  targetmachine=$(cat $inventory | jq -r '.[0] | select(.Role == "DATA") | .MachineName')
+  ip=$(cat $inventory | jq -r '.[] | select(.Role == "DATA") | .DNSName')
+  targetmachine=$(cat $inventory | jq -r '.[] | select(.Role == "DATA") | .MachineName')
+  iparr=($ip)
+  if [ -n "${iparr[0]}" ]; then
+    ip=${iparr[0]}
+    tgtarr=($targetmachine)
+    targetmachine=${tgtarr[0]}
+  fi
 fi
 
 # install ivp app classes, if Containerless
 if [ $isContainerless = "true" ]; then
   docker cp install-ivp.sh $icmname:/root
   docker cp icmcl-atelier-prj $icmname:/root
+  echo "Installing IVP into "$targetmachine
   docker exec $icmname /root/install-ivp.sh $icmdata $targetmachine
 
-  echo "Accessing "$ip
-  curl -H "Content-Type: application/json; charset=UTF-8" -H "Accept:application/json" "http://$ip:52773/csp/myapp/get" --user "SuperUser:sys"
+  if [ -n "$bastionip" ]; then
+    echo "Accessing "$bastionip
+    curl -H "Content-Type: application/json; charset=UTF-8" -H "Accept:application/json" "http://$bastionip:52774/csp/myapp/get" --user "SuperUser:sys"
+  else
+    echo "Accessing "$ip
+    curl -H "Content-Type: application/json; charset=UTF-8" -H "Accept:application/json" "http://$ip:52773/csp/myapp/get" --user "SuperUser:sys"
+  fi
+
 fi
 
 # Run user script if exists.
