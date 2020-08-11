@@ -111,7 +111,8 @@ else
   docker exec $icmname sh -c "cd $icmdata; icm provision; icm run"
 fi
 
-rm -fR ./Backup/$icmname/*
+# you may need greater privs to remove folders made by a container.
+sudo rm -fR ./Backup/$icmname/*
 mkdir ./Backup/$icmname
 # save ssh/tls folder(s) to local, just in case.
 docker cp $icmname:/Samples/ssh/ ./Backup/$icmname/ssh
