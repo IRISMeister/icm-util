@@ -12,7 +12,7 @@ docker stop $icmname
 docker rm $icmname
 
 # remove backup files
-rm -fR ./Backup/$icmname
+sudo rm -fR ./Backup/$icmname
 
 # remove a ssh key file
 rm -f ~/insecure_$icmname
