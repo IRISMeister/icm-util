@@ -1,7 +1,7 @@
 {
     "Containerless": "true",
     "Provider": "AWS",
-    "Label": "MyIRISRAW",
+    "Label": "MyIRISCL",
     "Tag": "TEST",
     "DataVolumeSize": "1024",
     "WIJVolumeSize": "256",

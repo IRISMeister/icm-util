@@ -11,9 +11,5 @@ docker exec $icmname sh -c 'cd $(cat dir.txt); icm unprovision -cleanUp -force; 
 docker stop $icmname
 docker rm $icmname
 
-# remove backup files
-rm -fR ./Backup/$icmname
-
-# remove a ssh key file
-rm -f ~/insecure_$icmname
-
+# remove external data
+sudo rm -fR icm_data/$provider/$icmname

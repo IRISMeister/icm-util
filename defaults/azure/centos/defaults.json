@@ -1,7 +1,7 @@
 {
     "Containerless": "true",
     "Provider": "Azure",
-    "Label": "MyIRISRAW",
+    "Label": "MyIRISCL",
     "Tag": "PROD",
     "DataVolumeSize": "20",
     "SSHPrivateKey": "/Samples/ssh/insecure",

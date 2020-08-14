@@ -13,4 +13,6 @@ tmp-*
 secret/azure-secret.json
 secret/docker-secret.json
 app/*
-test.inventory
+fast_kit_uploader.sh
+do_fast_kit_upload.sh
+gnupg.tar

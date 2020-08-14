@@ -1,18 +1,38 @@
 # icm-util
-Tested under V2019.4.0.383.0
+This utility is to help depoy InterSystems IRIS cluster via ICM in container less mode.  
+(Container mode will work, though)  
+
+Tested on Ubuntu 18.04LTS  (may not work on Windows)  
+Tested against IRIS V2020.1.
+
+# Prerequisite
+docker  
+jq  
+```
+sudo apt install jq
+```
 
 # Before running
-Edit envs.sh to meet your purpose.
+Acquire iris kit(tar.gz), icm docker image, iris license key.  
+Edit params.sh to meet your purpose.
 ```
-vi envs.sh
+vi params.sh
 ```
 
-If you are using Azure or Container version on any cloud you need to performe the following. These file are subject to be mergerd with defaults.json file when run.
+If you are using AWS, prepare your aws credentials.
+```
+vi .aws/credentials
+```
+
+If you are using Azure, you need to performe the following. These file are subject to be mergerd with defaults.json file when run.
 - Provide azure access keys.
 ```
 cp secret/azure-secret.json.template secret/azure-secret.json
 vi secret/azure-secret.json
 ```
+
+If you are using container mode on any cloud, you need to performe the following. These file are subject to be mergerd with defaults.json file when run.
+
 - Provide docker user/password and docker image info.  
 If you do not want to override DockerImage in defaults.json file, remove it from docker-secret.json.
 ```
@@ -20,7 +40,8 @@ cp secret/docker-secret.json.template secret/docker-secret.json
 vi secret/docker-secret.json
 ```
 **Do not leave value of "ISCPassword" in defaults.json as is because it is too obvious!!!**  
-defaults.json files are localted under provider/os/.  So If you are using ubuntu on aws, it will be aws/os/defaults*.json
+defaults.json files are localted under provider/os/.  So If you are using ubuntu on aws, it will be defaults/aws/ubuntu/defaults.json . 
+If you want to enable mirroring (by using definition-mirror.json for example), you need to edit defaults.json and change "Mirror" value from "false" to "true".
 ```
 vi which_ever_defaults_file_you_may_use.json
 ```
@@ -31,6 +52,9 @@ To run
 ```
 ./run.sh  
 ```
+Every icm related data will be stored under ./icm_data (for example, icm_data/aws/MyIRIS/).
+This folder is mounted as external voulme by the icm container to /Production.
+
 To remove  
 ```
 ./rm.sh containerName
@@ -55,8 +79,8 @@ If BH is in place, you need to use following ssh syntax (ip/host are masked by '
 ```
 Machine                        IP Address       DNS Name                                 Provider Region     Zone
 -------                        ----------       --------                                 -------- ------     ----
-MyIRISRAW-BH-TEST-0001         54.250.x.x   ec2-54-250-x-x.ap-northeast-1.comput AWS      ap-northeast-1 a
-MyIRISRAW-DM-TEST-0001         10.0.x.x     10.0.x.x                             AWS      ap-northeast-1 a
+MyIRISCL-BH-TEST-0001         54.250.x.x   ec2-54-250-x-x.ap-northeast-1.comput AWS      ap-northeast-1 a
+MyIRISCL-DM-TEST-0001         10.0.x.x     10.0.x.x                             AWS      ap-northeast-1 a
 ```
 ```
 ssh -i insecure -oProxyCommand='ssh -i insecure -W %h:%p ubuntu@ec2-54-250-x-x.ap-northeast-1.compute.amazonaws.com' ubuntu@10.0.x.x
