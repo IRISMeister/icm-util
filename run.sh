@@ -169,27 +169,34 @@ docker exec $icmname sh -c "cd $icmdata; icm ps -json > /dev/null; cat response.
 
 ########################################################################################
 # looking for 
-#    an appropriate IRIS instance to install IVP. DM(mirrot primary), DATA(any).
-#    ip address of its endpoint. BH,DM(mirror primary),DATA.
+#    an appropriate IRIS MachineName to install IVP. Could be DM(mirrot primary), DATA(any).
+#    DNSName of its endpoint. Could be BH,DM(mirror primary),DATA.
+#    I wonder if there is any better way...?
 ########################################################################################
 # Does BH exist?
 bastionip=$(cat $inventory | jq -r '.[] | select(.Role == "BH") | .DNSName')
 bastiontargetmachine=$(cat $inventory | jq -r '.[] | select(.Role == "BH") | .MachineName')
 
-# Is it safe to assume the first DM is always primary mirror member?
-ip=$(cat $inventory | jq -r '.[] | select(.Role == "DM") | .DNSName')
-targetmachine=$(cat $inventory | jq -r '.[] | select(.Role == "DM") | .MachineName')
-iparr=($ip)
-if [ -n "${iparr[0]}" ]; then
-  ip=${iparr[0]}
-  tgtarr=($targetmachine)
-  targetmachine=${tgtarr[0]}
+isMirror=$(cat icm_data/$provider/$icmname/$provider/defaults.json | jq -r '.Mirror')
+if [ $isMirror="true" ]; then
+  ip=$(cat $ps | jq -r '.[] | select(.Role == "DM" and .MirrorStatus=="PRIMARY") | .DNSName')
+  targetmachine=$(cat $ps | jq -r '.[] | select(.Role == "DM" and .MirrorStatus=="PRIMARY") | .MachineName')
 fi
-
-# if there is no DM, use the first DATA node.
+# picks up the first DM
 if [ -z "$ip" ]; then
-  ip=$(cat $inventory | jq -r '.[] | select(.Role == "DATA") | .DNSName')
-  targetmachine=$(cat $inventory | jq -r '.[] | select(.Role == "DATA") | .MachineName')
+  ip=$(cat $ps | jq -r '.[] | select(.Role == "DM") | .DNSName')
+  targetmachine=$(cat $ps | jq -r '.[] | select(.Role == "DM") | .MachineName')
+  iparr=($ip)
+  if [ -n "${iparr[0]}" ]; then
+    ip=${iparr[0]}
+    tgtarr=($targetmachine)
+    targetmachine=${tgtarr[0]}
+  fi
+fi
+# if there is no DM, use the first DATA node found.
+if [ -z "$ip" ]; then
+  ip=$(cat $ps | jq -r '.[] | select(.Role == "DATA") | .DNSName')
+  targetmachine=$(cat $ps | jq -r '.[] | select(.Role == "DATA") | .MachineName')
   iparr=($ip)
   if [ -n "${iparr[0]}" ]; then
     ip=${iparr[0]}
@@ -207,9 +214,9 @@ echo '$targetmachine': $targetmachine >> icm_data/$provider/$icmname/params
 # install ivp app classes, if Containerless
 ########################################################################################
 if [ $isContainerless = "true" ]; then
+  echo "Installing IVP into "$targetmachine
   docker cp install-ivp.sh $icmname:/root
   docker cp icmcl-atelier-prj $icmname:/root
-  echo "Installing IVP into "$targetmachine
   docker exec $icmname /root/install-ivp.sh $icmdata $targetmachine
 
   if [ -n "$bastionip" ]; then
