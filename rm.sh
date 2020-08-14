@@ -12,4 +12,5 @@ docker stop $icmname
 docker rm $icmname
 
 # remove external data
+echo "Removing ./icm_data/$provider/$icmname"
 sudo rm -fR icm_data/$provider/$icmname

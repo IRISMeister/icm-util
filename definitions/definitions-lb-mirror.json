@@ -1,12 +1,9 @@
 [
     {
-	    "Role": "LB",
-	    "Count": "1"
-    },
-    {
 	    "Role": "DM",
         "Count": "2",
         "MirrorMap": "primary,backup",
-        "ZoneMap": "0,1"
+        "ZoneMap": "0,1",
+        "LoadBalancer": "true"
     }
 ]

@@ -41,7 +41,7 @@ vi secret/docker-secret.json
 ```
 **Do not leave value of "ISCPassword" in defaults.json as is because it is too obvious!!!**  
 defaults.json files are localted under provider/os/.  So If you are using ubuntu on aws, it will be defaults/aws/ubuntu/defaults.json . 
-If you want to enable mirroring (by using definition-mirror.json for example), you need to edit defaults.json and change "Mirror" value from "false" to "true".  
+If you want to enable mirroring (by using definition-mirror.json for example), you need to edit defaults.json and change "Mirror" value from "false" to "true", uncomment "_Zone" and comment out "Zone".  
 ```
 vi which_ever_defaults_file_you_may_use.json
 ```
