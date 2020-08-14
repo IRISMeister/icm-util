@@ -28,7 +28,6 @@ export defaults=defaults.json
 
 export definitions=definitions.json
 #export definitions=definitions-bh.json
-#export definitions=definitions-lb-mirror.json
 #export definitions=definitions-mirror.json
 #export definitions=definitions-shard.json
 #export definitions=definitions-shard-node.json

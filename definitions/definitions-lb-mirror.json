@@ -1,9 +1,0 @@
-[
-    {
-	    "Role": "DM",
-        "Count": "2",
-        "MirrorMap": "primary,backup",
-        "ZoneMap": "0,1",
-        "LoadBalancer": "true"
-    }
-]
