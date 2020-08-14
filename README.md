@@ -41,10 +41,16 @@ vi secret/docker-secret.json
 ```
 **Do not leave value of "ISCPassword" in defaults.json as is because it is too obvious!!!**  
 defaults.json files are localted under provider/os/.  So If you are using ubuntu on aws, it will be defaults/aws/ubuntu/defaults.json . 
-If you want to enable mirroring (by using definition-mirror.json for example), you need to edit defaults.json and change "Mirror" value from "false" to "true".
+If you want to enable mirroring (by using definition-mirror.json for example), you need to edit defaults.json and change "Mirror" value from "false" to "true".  
 ```
 vi which_ever_defaults_file_you_may_use.json
 ```
+run.sh uses Label value from default.json file to uniquely identify your run. It is used as container name and as part of external volume path like below.
+```
+icmname=$(cat defaults/aws/ubuntu/defaults.json | jq -r '.Label')
+docker run -d -v $(pwd)/icm_data/aws/$icmname:/Production ... --name $icmname
+```
+
 
 
 # How to Run
@@ -53,7 +59,8 @@ To run
 ./run.sh  
 ```
 Every icm related data will be stored under ./icm_data (for example, icm_data/aws/MyIRIS/).
-This folder is mounted as external voulme by the icm container to /Production.
+This folder is mounted as external voulme by the icm container to /Production.  
+If you run.sh when params.sh says restoreExistingEnv=true, run.sh will try to restore matching ICM environment from external volume mentioned above.  
 
 To remove  
 ```
