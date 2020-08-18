@@ -7,9 +7,11 @@ fi
 icmname=$1
 
 # cleanup cloud resources
-docker exec $icmname sh -c 'cd $(cat dir.txt); icm unprovision -cleanUp -force; rm *.log'
+provider=$(docker exec $icmname sh -c 'cat provider.txt')
+docker exec $icmname sh -c 'cd $(cat folder.txt); icm unprovision -cleanUp -force; rm *.log'
 docker stop $icmname
 docker rm $icmname
+
 
 # remove external data
 echo "Removing ./icm_data/$provider/$icmname"

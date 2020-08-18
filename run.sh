@@ -1,16 +1,41 @@
 #!/bin/bash -e
 source params.sh
 
-if [ -e icm_data/$provider/$icmname ]; then
-  if [ ! $restoreExistingEnv = "true" ]; then
-    echo "There is an icm environment by the same name alrady. icmname: $provider/$icmname.  Will remove it first."
-    sudo rm -fR icm_data/$provider/$icmname/*
+################################################################################
+# if there is a container by the same name, try to restore it and exit.
+################################################################################
+if [ $restoreExistingEnv = "true" ]; then
+  containerid=$(docker ps -q -f "name=$icmname" -f "status=running")
+  #; if there is a 'Up' container.
+  if [ -n "$containerid" ]; then
+    echo "Container $icmname is already running. Nothing to do."
+    exit 0
   fi
-else
-  # don't let docker make it beacuse it will be owned by root
-  mkdir -p icm_data/$provider/$icmname
-  # preserve current params.sh so that I can run multiple icm instances concurrently.
-  cp ./params.sh icm_data/$provider/$icmname/params.sh
+  containerid=$(docker ps -a -q -f "name=$icmname" -f "status=exited")
+  #; if there is a 'Exited' container.
+  if [ -n "$containerid" ]; then
+    echo "Restaring container $icmname."
+    docker start $icmname
+    exit 0
+  #; if there is no container.
+  else
+    #; if external data is left, use it.
+    if [ -e icm_data/$provider/$icmname/$provider ]; then
+      echo "Recreating container $icmname from existing folder icm_data/$provider/$icmname/$provider"
+      echo "If this is not what you want, sudo rm -fR icm_data/$provider/$icmname, before calling run.sh."
+      docker run -d -v $(pwd -P)/icm_data/$provider/$icmname:/Production --name $icmname $icmimg tail -f /dev/null
+      # restore ssh/tls files as well.
+      docker cp icm_data/$provider/$icmname/ssh $icmname:/Samples 
+      docker cp icm_data/$provider/$icmname/tls $icmname:/Samples
+ 
+      # restore informative files. We use them in rm.sh.
+      docker exec $icmname sh -c "echo $icmdata > folder.txt"
+      docker exec $icmname sh -c "echo $provider > provider.txt"
+
+      exit 0
+    fi
+  fi
+  # At this point, there is no way left to restore.
 fi
 
 ################################################################################
@@ -53,51 +78,35 @@ fi
 
 echo "Provider:"$provider" os:"$targetos" isContainerless:"$isContainerless" container name:"$icmname
 
-################################################################################
-# if there is a container by the same name, try to restore it.
-################################################################################
-if [ $restoreExistingEnv = "true" ]; then
-  containerid=$(docker ps -q -f "name=$icmname" -f "status=running")
-  #; if there is a 'Up' container.
-  if [ -n "$containerid" ]; then
-    echo "Container $icmname is already running. Nothing to do."
-    exit 0
-  fi
-  containerid=$(docker ps -a -q -f "name=$icmname" -f "status=exited")
-  #; if there is a 'Exited' container.
-  if [ -n "$containerid" ]; then
-    echo "Restaring container $icmname."
-    docker start $icmname
-    exit 0
-  #; if there is no container.
-  else
-    #; if external data is left, use it.
-    if [ -e icm_data/$provider/$icmname/$provider ]; then
-      echo "Recreating container $icmname."
-      echo "If this is not what you want, sudo rm -fR icm_data/$provider/$icmname, before calling run.sh."
-      docker run -d -v $(pwd)/icm_data/$provider/$icmname:/Production -v $(pwd)/icm_data/$provider/$icmname/ssh:/Samples/ssh -v $(pwd)/icm_data/$provider/$icmname/tls:/Samples/tls --name $icmname $icmimg tail -f /dev/null
-      exit 0
-    fi
-  fi
-fi
+# Need sudo because some files may owned by root (bacause they are created by docker-daemon)
+sudo rm -fR icm_data/$provider/$icmname
+# don't let docker make it beacuse it will be owned by root
+mkdir -p icm_data/$provider/$icmname
+# preserve current params.sh so that I can run multiple icm instances concurrently.
+cp ./params.sh icm_data/$provider/$icmname/params.sh
 
 docker stop $icmname | true
 docker rm $icmname | true
-docker run -d -v $(pwd)/icm_data/$provider/$icmname:/Production -v $(pwd)/icm_data/$provider/$icmname/ssh:/Samples/ssh -v $(pwd)/icm_data/$provider/$icmname/tls:/Samples/tls --name $icmname $icmimg tail -f /dev/null
+docker run -d -v $(pwd -P)/icm_data/$provider/$icmname:/Production --name $icmname $icmimg tail -f /dev/null
 
 # I didn't want to rewrite every defaults.json files about location of ssh/tls.
+# On Windows, do not place ssh/tls files under /Production where is extenally mounted. 
+# (if you do, ssh will fail with bad permissions)
 docker exec $icmname sh -c "keygenTLS.sh /Samples/tls; keygenSSH.sh /Samples/ssh"
 docker exec $icmname mkdir -p /Production/license
 
-# copy a ssh private key and chown for later use by user. May not work on Winodws.
-sudo cp icm_data/$provider/$icmname/ssh/insecure icm_data/$provider/$icmname/
-sudo chown $(whoami) icm_data/$provider/$icmname/insecure
+# If I externally mounted those folders, on docker Windows, icm provision fails because of its limited support for file protections.
+# So I have to copy ssh/tls files to outside of the container to preserve them.
+docker cp $icmname:/Samples/ssh icm_data/$provider/$icmname/
+docker cp $icmname:/Samples/tls icm_data/$provider/$icmname/
+
 
 if [ $isContainerless = "true" ]; then
   docker cp kits/$kitname $icmname:/root
 fi
 docker exec $icmname mkdir -p $icmdata
-docker exec $icmname sh -c "echo $icmdata > dir.txt"
+docker exec $icmname sh -c "echo $icmdata > folder.txt"
+docker exec $icmname sh -c "echo $provider > provider.txt"
 
 ################################################################################
 # apply changes to a defaults.json template.
@@ -251,4 +260,4 @@ grep "Management Portal available at" icm_data/$provider/$icmname/$provider/icm.
 sshuser=$(cat icm_data/$provider/$icmname/$provider/defaults.json | jq -r '.SSHUser')
 echo "==================================================="
 echo "how to login"
-echo " ssh -i icm_data/$provider/$icmname/insecure -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $sshuser@$ip"
+echo " ssh -i icm_data/$provider/$icmname/ssh/insecure -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $sshuser@$ip"
