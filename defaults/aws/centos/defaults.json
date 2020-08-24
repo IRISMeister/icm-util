@@ -25,5 +25,5 @@
     "ISCPassword": "sys",
     "Namespace": "MYAPP",
     "Mirror": "false",
-    "UserCPF": "to_be_replaced_by_run.sh"
+    "UserCPF": "/Production/mergefiles/merge.cpf"
 }
