@@ -9,7 +9,7 @@
     "SSHUser": "ec2-user",
     "SSHPublicKey": "/Samples/ssh/insecure-ssh2.pub",
     "SSHPrivateKey": "/Samples/ssh/insecure",
-    "DockerImage": "intersystems/iris:2019.4.0.383.0",
+    "DockerImage": "to_be_replaced_by_run.sh",
     "DockerUsername": "to_be_replaced_by_run.sh",
     "DockerPassword": "to_be_replaced_by_run.sh",
     "TLSKeyDir": "/Samples/tls/",
